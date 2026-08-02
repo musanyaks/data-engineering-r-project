@@ -724,10 +724,3 @@ If you encounter issues:
 ---
 
 **Built for reliability on constrained hardware. Process data larger than your RAM without crashing.**
-```
-
-
-
-
-
-+-------------+
