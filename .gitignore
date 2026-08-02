@@ -1,0 +1,38 @@
+# R
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.renv
+renv/library/
+renv/python/
+renv/staging/
+
+# Data (keep structure, ignore contents)
+data/raw/*
+data/processed/*
+data/archive/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/archive/.gitkeep
+
+# Logs
+logs/*.log
+
+# Reports
+reports/*.txt
+reports/*.html
+reports/*.pdf
+
+# Targets
+data/processed/_targets/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

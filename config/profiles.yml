@@ -1,0 +1,29 @@
+# Environment Profiles
+
+dev:
+  logging:
+    level: "DEBUG"
+  database:
+    memory_limit: "1GB"
+    threads: 1
+
+prod:
+  logging:
+    level: "INFO"
+  database:
+    memory_limit: "2GB"
+    threads: 2
+  etl:
+    batch_size: 100000
+    remove_duplicates: true
+
+test:
+  logging:
+    level: "WARN"
+    directory: "logs/test"
+  database:
+    path: ":memory:"
+    memory_limit: "512MB"
+    threads: 1
+  etl:
+    batch_size: 1000

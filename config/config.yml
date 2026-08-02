@@ -1,0 +1,41 @@
+# Main Configuration
+# Optimized for 4GB RAM / 20GB SSD
+
+project:
+  name: "data-engineering-pipeline"
+  version: "1.0.0"
+
+resources:
+  memory_limit_mb: 2048        # Leave 2GB for OS
+  min_disk_free_gb: 2           # Require 2GB free
+  max_temp_size_gb: 5
+
+database:
+  path: "data/processed/pipeline.duckdb"
+  memory_limit: "2GB"
+  threads: 2
+  max_temp_directory_size: "5GB"
+
+logging:
+  level: "INFO"
+  directory: "logs"
+  max_files: 10
+  max_size_mb: 50
+
+etl:
+  input_pattern: "*.csv"
+  table_prefix: "staging_"
+  batch_size: 50000
+  na_strategy: "ignore"         # Options: ignore, drop, fill
+  na_fill_value: 0
+  remove_duplicates: true
+  source_file: null
+
+validation:
+  stop_on_error: true
+  sample_size: 100000          # Validate sample for large datasets
+
+archive:
+  enabled: true
+  retention_days: 30
+  compress: true
