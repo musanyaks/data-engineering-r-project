@@ -5,13 +5,25 @@
 
 library(yaml)
 
+#' Get project root directory
+get_project_root <- function() {
+  dirs <- c(".", "..", "../..", "../../..")
+  for (d in dirs) {
+    if (file.exists(file.path(d, "config", "config.yml"))) {
+      return(normalizePath(d))
+    }
+  }
+  return(".")
+}
+
 #' Load configuration
 #' @param profile Character. Environment profile: "dev", "prod", "test"
 #' @return List. Merged configuration
 load_config <- function(profile = Sys.getenv("R_CONFIG_PROFILE", "dev")) {
-  base_config <- yaml::read_yaml("config/config.yml")
+  root <- get_project_root()
+  base_config <- yaml::read_yaml(file.path(root, "config", "config.yml"))
   
-  profile_file <- "config/profiles.yml"
+  profile_file <- file.path(root, "config", "profiles.yml")
   if (file.exists(profile_file)) {
     profiles <- yaml::read_yaml(profile_file)
     if (!is.null(profiles[[profile]])) {

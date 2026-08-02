@@ -3,7 +3,7 @@
 #' Memory-efficient extract, transform, load operations.
 
 library(data.table)
-library(arrow)
+if (requireNamespace("arrow", quietly = TRUE)) library(arrow)
 
 #' Extract data from CSV with memory monitoring
 #' @param file_path Path to CSV file
@@ -24,13 +24,17 @@ extract_csv <- function(file_path, config, select_cols = NULL, nrows = NULL) {
     flog.warn("Large file detected (%.0f MB). Consider chunked processing.", file_size / (1024*1024))
   }
   
-  dt <- data.table::fread(
+  args <- list(
     file = file_path,
     select = select_cols,
-    nrows = nrows,
     showProgress = FALSE,
     verbose = FALSE
   )
+  if (!is.null(nrows)) {
+    args$nrows <- nrows
+  }
+  
+  dt <- do.call(data.table::fread, args)
   
   flog.info("Extracted %d rows, %d columns", nrow(dt), ncol(dt))
   log_memory("after_extract")
@@ -43,6 +47,9 @@ extract_csv <- function(file_path, config, select_cols = NULL, nrows = NULL) {
 #' @param columns Columns to select
 #' @return Arrow Table or data.table
 extract_parquet <- function(file_path, config, columns = NULL) {
+  if (!requireNamespace("arrow", quietly = TRUE)) {
+    stop("Package 'arrow' is required for Parquet files. Install with: install.packages('arrow')")
+  }
   if (!file.exists(file_path)) {
     stop("File not found: ", file_path)
   }
@@ -92,8 +99,8 @@ transform_clean <- function(dt, config) {
     flog.info("Removed %d duplicate rows", before - nrow(dt))
   }
   
-  dt[, _loaded_at := Sys.time()]
-  dt[, _source_file := get_config(config, "etl.source_file", NA_character_)]
+  dt[, `_loaded_at` := Sys.time()]
+  dt[, `_source_file` := get_config(config, "etl.source_file", NA_character_)]
   
   flog.info("Clean transform complete: %d rows, %d columns", nrow(dt), ncol(dt))
   log_memory("after_transform")
@@ -159,6 +166,9 @@ load_to_duckdb <- function(conn, dt, table_name, batch_size = 50000, overwrite =
 #' @param partition_cols Columns to partition by
 #' @param compression Compression codec
 load_to_parquet <- function(dt, file_path, partition_cols = NULL, compression = "zstd") {
+  if (!requireNamespace("arrow", quietly = TRUE)) {
+    stop("Package 'arrow' is required for Parquet output. Install with: install.packages('arrow')")
+  }
   flog.info("Writing Parquet: %s", file_path)
   
   if (inherits(dt, "data.table")) {

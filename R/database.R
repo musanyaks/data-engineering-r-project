@@ -4,6 +4,7 @@
 
 library(DBI)
 library(duckdb)
+library(futile.logger)
 
 .DB_CONN <- NULL
 
@@ -20,7 +21,7 @@ get_db_connection <- function(config) {
   if (!dir.exists(db_dir)) dir.create(db_dir, recursive = TRUE)
   
   memory_limit <- get_config(config, "database.memory_limit", "2GB")
-  threads <- get_config(config, "database.threads", 2)
+  threads <- as.character(get_config(config, "database.threads", 2))
   
   .DB_CONN <<- DBI::dbConnect(
     duckdb::duckdb(),
@@ -28,12 +29,11 @@ get_db_connection <- function(config) {
     config = list(
       memory_limit = memory_limit,
       threads = threads,
-      enable_progress_bar = "false",
       max_temp_directory_size = "5GB"
     )
   )
   
-  flog.info("DuckDB connected: %s (memory_limit=%s, threads=%d)", db_path, memory_limit, threads)
+  flog.info("DuckDB connected: %s (memory_limit=%s, threads=%s)", db_path, memory_limit, threads)
   .DB_CONN
 }
 
